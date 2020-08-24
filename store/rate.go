@@ -101,6 +101,33 @@ type SberRate struct {
 	} `json:"base"`
 }
 
+type AlfaRate struct {
+	Usd []struct {
+		Type  string  `json:"type"`
+		Date  string  `json:"date"`
+		Value float32 `json:"value"`
+		Order string  `json:"order"`
+	} `json:"usd"`
+	Eur []struct {
+		Type  string  `json:"type"`
+		Date  string  `json:"date"`
+		Value float32 `json:"value"`
+		Order string  `json:"order"`
+	} `json:"eur"`
+	Chf []struct {
+		Type  string  `json:"type"`
+		Date  string  `json:"date"`
+		Value float32 `json:"value"`
+		Order string  `json:"order"`
+	} `json:"chf"`
+	Gbp []struct {
+		Type  string  `json:"type"`
+		Date  string  `json:"date"`
+		Value float32 `json:"value"`
+		Order string  `json:"order"`
+	} `json:"gbp"`
+}
+
 type Rate struct {
 	Buy          float32 `json:"buy,omitempty"`
 	Sell         float32 `json:"sell,omitempty"`
@@ -147,5 +174,21 @@ func MakeFromSber(sberRate *SberRate, amount int, currency string) *Rate {
 			rate.Buy = sberRate.Base.Num840.Num0.BuyValue
 		}
 	}
+	return rate
+}
+
+func MakeFromAlfa(alfaRate *AlfaRate, currency string) *Rate {
+	rate := &Rate{}
+	rate.ToCurrency = RUB
+	rate.FromCurrency = currency
+	switch currency {
+	case USD:
+		rate.Buy = alfaRate.Usd[0].Value
+		rate.Sell = alfaRate.Usd[1].Value
+	case EUR:
+		rate.Buy = alfaRate.Eur[0].Value
+		rate.Sell = alfaRate.Eur[1].Value
+	}
+
 	return rate
 }
