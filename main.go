@@ -92,26 +92,16 @@ func getAllRates(currency string) (rates []store.Rate) {
 }
 
 func main() {
-	/*rate, err := getTinkoffRate(store.USD, store.RUB)
-	if err != nil {
-		panic(err)
+	for {
+		printAllRates()
+		time.Sleep(10 * time.Second)
 	}
-	fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", rate.Owner, rate.FromCurrency, rate.ToCurrency, rate.Buy, rate.Sell)
+}
 
-	rateSber, err := getSberRate(store.USD, 100)
-	if err != nil {
-		panic(err)
-	}
-	fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", rateSber.Owner, rateSber.FromCurrency, rateSber.ToCurrency, rateSber.Buy, rateSber.Sell)
-
-	rateAlfa, err := getAlfaRate(store.USD)
-	if err != nil {
-		panic(err)
-	}*/
+func printAllRates() {
 	rate := getAllRates(store.USD)
-	fmt.Println("LEN == ", len(rate))
 	for _, r := range rate {
 		fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", r.Owner, r.FromCurrency, r.ToCurrency, r.Buy, r.Sell)
 	}
-
+	fmt.Println("<========================>")
 }
