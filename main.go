@@ -4,6 +4,7 @@ import (
 	"./store"
 	"encoding/json"
 	"fmt"
+	"sync"
 
 	"net/http"
 	"time"
@@ -59,22 +60,58 @@ func getAlfaRate(currency string) (*store.Rate, error) {
 	return store.MakeFromAlfa(ar, currency), nil
 }
 
+func getAllRates(currency string) (rates []store.Rate) {
+	wg := sync.WaitGroup{}
+	wg.Add(3)
+	go func() {
+		rate, err := getTinkoffRate(currency, store.RUB)
+		if err != nil {
+			return
+		}
+		rates = append(rates, *rate)
+		wg.Done()
+	}()
+	go func() {
+		rate, err := getSberRate(currency, 100)
+		if err != nil {
+			return
+		}
+		rates = append(rates, *rate)
+		wg.Done()
+	}()
+	go func() {
+		rate, err := getAlfaRate(currency)
+		if err != nil {
+			return
+		}
+		rates = append(rates, *rate)
+		wg.Done()
+	}()
+	wg.Wait()
+	return rates
+}
+
 func main() {
-	rate, err := getTinkoffRate(store.USD, store.RUB)
+	/*rate, err := getTinkoffRate(store.USD, store.RUB)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("TINKOFF: %s -> %s BUY: %.2f  SELL: %.2f\n", rate.FromCurrency, rate.ToCurrency, rate.Buy, rate.Sell)
+	fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", rate.Owner, rate.FromCurrency, rate.ToCurrency, rate.Buy, rate.Sell)
 
 	rateSber, err := getSberRate(store.USD, 100)
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("SBER: %s -> %s BUY: %.2f  SELL: %.2f\n", rateSber.FromCurrency, rateSber.ToCurrency, rateSber.Buy, rateSber.Sell)
+	fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", rateSber.Owner, rateSber.FromCurrency, rateSber.ToCurrency, rateSber.Buy, rateSber.Sell)
 
 	rateAlfa, err := getAlfaRate(store.USD)
 	if err != nil {
 		panic(err)
+	}*/
+	rate := getAllRates(store.USD)
+	fmt.Println("LEN == ", len(rate))
+	for _, r := range rate {
+		fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", r.Owner, r.FromCurrency, r.ToCurrency, r.Buy, r.Sell)
 	}
-	fmt.Printf("ALFA: %s -> %s BUY: %.2f  SELL: %.2f\n", rateAlfa.FromCurrency, rateAlfa.ToCurrency, rateAlfa.Buy, rateAlfa.Sell)
+
 }

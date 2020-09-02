@@ -129,6 +129,7 @@ type AlfaRate struct {
 }
 
 type Rate struct {
+	Owner        string  `json:"owner"`
 	Buy          float32 `json:"buy,omitempty"`
 	Sell         float32 `json:"sell,omitempty"`
 	ToCurrency   string  `json:"toCurrency"`
@@ -141,6 +142,7 @@ func MakeFromTinkoff(tinkoffRate *TinkoffRate) *Rate {
 	for _, r := range rates {
 		if r.Category == tinkoffGroup {
 			return &Rate{
+				Owner:        "TINKOFF",
 				Buy:          r.Buy,
 				Sell:         r.Sell,
 				ToCurrency:   r.ToCurrency.Name,
@@ -153,7 +155,7 @@ func MakeFromTinkoff(tinkoffRate *TinkoffRate) *Rate {
 }
 
 func MakeFromSber(sberRate *SberRate, amount int, currency string) *Rate {
-	rate := &Rate{}
+	rate := &Rate{Owner: "SBER"}
 	rate.ToCurrency = RUB
 	rate.FromCurrency = currency
 	switch currency {
@@ -178,7 +180,7 @@ func MakeFromSber(sberRate *SberRate, amount int, currency string) *Rate {
 }
 
 func MakeFromAlfa(alfaRate *AlfaRate, currency string) *Rate {
-	rate := &Rate{}
+	rate := &Rate{Owner: "ALFA"}
 	rate.ToCurrency = RUB
 	rate.FromCurrency = currency
 	switch currency {
