@@ -2,7 +2,6 @@ package rest
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/ilya-sokolov/bank-aggregator/store"
 	"net/http"
 	"sync"
@@ -61,9 +60,8 @@ func getAlfaRate(currency string) (*store.Rate, error) {
 
 func AllRates(w http.ResponseWriter, r *http.Request) {
 	rates := getAllRates(store.USD)
-	for _, r := range rates {
-		fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", r.Owner, r.FromCurrency, r.ToCurrency, r.Buy, r.Sell)
-	}
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rates)
 }
 
 func RateOwner(w http.ResponseWriter, r *http.Request) {
@@ -87,7 +85,8 @@ func RateOwner(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Field \"owner\" has empty.", http.StatusInternalServerError)
 		return
 	}
-	fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", rate.Owner, rate.FromCurrency, rate.ToCurrency, rate.Buy, rate.Sell)
+	w.Header().Add("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(rate)
 }
 
 func getAllRates(currency string) (rates []store.Rate) {
