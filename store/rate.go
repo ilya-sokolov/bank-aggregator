@@ -1,5 +1,10 @@
 package store
 
+rimport (
+	"fmt"
+	"time"
+)
+
 const (
 	tinkoffGroup = "SavingAccountTransfers"
 	EUR          = "EUR"
@@ -11,7 +16,7 @@ type TinkoffRate struct {
 	ResultCode string `json:"resultCode"`
 	Payload    struct {
 		LastUpdate struct {
-			Milliseconds int `json:"milliseconds"`
+			Milliseconds int64 `json:"milliseconds"`
 		} `json:"lastUpdate"`
 		Rates []struct {
 			Category     string `json:"category"`
@@ -44,7 +49,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int     `json:"activeFrom"`
+				ActiveFrom      int64     `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -59,7 +64,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int     `json:"activeFrom"`
+				ActiveFrom      int64     `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -76,7 +81,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int     `json:"activeFrom"`
+				ActiveFrom      int64     `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -91,7 +96,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int     `json:"activeFrom"`
+				ActiveFrom      int64     `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -134,7 +139,7 @@ type Rate struct {
 	Sell         float32 `json:"sell,omitempty"`
 	ToCurrency   string  `json:"toCurrency"`
 	FromCurrency string  `json:"fromCurrency"`
-	LastUpdate   int     `json:"lastUpdate"`
+	LastUpdate   int64     `json:"lastUpdate"`
 }
 
 func MakeFromTinkoff(tinkoffRate *TinkoffRate) *Rate {
@@ -163,17 +168,21 @@ func MakeFromSber(sberRate *SberRate, amount int, currency string) *Rate {
 		if amount >= 1000 {
 			rate.Sell = sberRate.Base.Num978.Num1000.SellValue
 			rate.Buy = sberRate.Base.Num978.Num1000.BuyValue
+			rate.LastUpdate = sberRate.Base.Num978.Num1000.ActiveFrom
 		} else {
 			rate.Sell = sberRate.Base.Num978.Num0.SellValue
 			rate.Buy = sberRate.Base.Num978.Num0.BuyValue
+			rate.LastUpdate = sberRate.Base.Num978.Num0.ActiveFrom
 		}
 	case USD:
 		if amount >= 1000 {
 			rate.Sell = sberRate.Base.Num840.Num1000.SellValue
 			rate.Buy = sberRate.Base.Num840.Num1000.BuyValue
+			rate.LastUpdate = sberRate.Base.Num840.Num1000.ActiveFrom
 		} else {
 			rate.Sell = sberRate.Base.Num840.Num0.SellValue
 			rate.Buy = sberRate.Base.Num840.Num0.BuyValue
+			rate.LastUpdate = sberRate.Base.Num840.Num0.ActiveFrom
 		}
 	}
 	return rate
@@ -191,6 +200,26 @@ func MakeFromAlfa(alfaRate *AlfaRate, currency string) *Rate {
 		rate.Buy = alfaRate.Eur[0].Value
 		rate.Sell = alfaRate.Eur[1].Value
 	}
+	dateString := ""
+	s := alfaRate.Usd[0].Date
+	for i,r := range s {
+		if s[i] != ' '{
+			dateString += string(r)
+		}
+		if len(dateString) == 10 {
+			dateString += "T"
+		}
+	}
+	dateString+=".03Z"
+	fmt.Println("TIME:", dateString)
+	dateTime, err := time.Parse(time.RFC3339, dateString)
+	if err != nil {
+		fmt.Println("err:", err)
+		rate.LastUpdate = 0
+		return rate
+	}
+	fmt.Println("dateTime:", dateTime)
+	rate.LastUpdate = dateTime.UnixNano() /1000000
 
 	return rate
 }
