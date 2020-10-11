@@ -1,6 +1,6 @@
 package store
 
-rimport (
+import (
 	"fmt"
 	"time"
 )
@@ -49,7 +49,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int64     `json:"activeFrom"`
+				ActiveFrom      int64   `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -64,7 +64,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int64     `json:"activeFrom"`
+				ActiveFrom      int64   `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -81,7 +81,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int64     `json:"activeFrom"`
+				ActiveFrom      int64   `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -96,7 +96,7 @@ type SberRate struct {
 				Scale           int     `json:"scale"`
 				BuyValue        float32 `json:"buyValue"`
 				SellValue       float32 `json:"sellValue"`
-				ActiveFrom      int64     `json:"activeFrom"`
+				ActiveFrom      int64   `json:"activeFrom"`
 				BuyValuePrev    float32 `json:"buyValuePrev"`
 				SellValuePrev   float32 `json:"sellValuePrev"`
 				AmountFrom      int     `json:"amountFrom"`
@@ -139,7 +139,7 @@ type Rate struct {
 	Sell         float32 `json:"sell,omitempty"`
 	ToCurrency   string  `json:"toCurrency"`
 	FromCurrency string  `json:"fromCurrency"`
-	LastUpdate   int64     `json:"lastUpdate"`
+	LastUpdate   int64   `json:"lastUpdate"`
 }
 
 func MakeFromTinkoff(tinkoffRate *TinkoffRate) *Rate {
@@ -202,15 +202,15 @@ func MakeFromAlfa(alfaRate *AlfaRate, currency string) *Rate {
 	}
 	dateString := ""
 	s := alfaRate.Usd[0].Date
-	for i,r := range s {
-		if s[i] != ' '{
+	for i, r := range s {
+		if s[i] != ' ' {
 			dateString += string(r)
 		}
 		if len(dateString) == 10 {
 			dateString += "T"
 		}
 	}
-	dateString+=".03Z"
+	dateString += ".03Z"
 	fmt.Println("TIME:", dateString)
 	dateTime, err := time.Parse(time.RFC3339, dateString)
 	if err != nil {
@@ -219,7 +219,7 @@ func MakeFromAlfa(alfaRate *AlfaRate, currency string) *Rate {
 		return rate
 	}
 	fmt.Println("dateTime:", dateTime)
-	rate.LastUpdate = dateTime.UnixNano() /1000000
+	rate.LastUpdate = dateTime.UnixNano() / 1000000
 
 	return rate
 }
