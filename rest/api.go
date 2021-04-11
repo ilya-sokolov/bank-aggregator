@@ -3,7 +3,7 @@ package rest
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/ilya-sokolov/bank-aggregator/store"
+	"github.com/i-redbyte/bank-aggregator/store"
 	"net/http"
 	"sync"
 	"time"
@@ -61,6 +61,7 @@ func getAlfaRate(currency string) (*store.Rate, error) {
 
 func AllRates(w http.ResponseWriter, r *http.Request) {
 	rates := getAllRates(store.USD)
+	fmt.Println(rates)
 	for _, r := range rates {
 		fmt.Printf("%s: %s -> %s BUY: %.2f  SELL: %.2f\n", r.Owner, r.FromCurrency, r.ToCurrency, r.Buy, r.Sell)
 	}
@@ -96,6 +97,8 @@ func getAllRates(currency string) (rates []store.Rate) {
 	go func() {
 		rate, err := getTinkoffRate(currency, store.RUB)
 		if err != nil {
+			fmt.Println("TinkoffError ", err)
+			wg.Done()
 			return
 		}
 		rates = append(rates, *rate)
@@ -104,6 +107,8 @@ func getAllRates(currency string) (rates []store.Rate) {
 	go func() {
 		rate, err := getSberRate(currency, 100)
 		if err != nil {
+			fmt.Println("SberError ", err)
+			wg.Done()
 			return
 		}
 		rates = append(rates, *rate)
@@ -112,6 +117,8 @@ func getAllRates(currency string) (rates []store.Rate) {
 	go func() {
 		rate, err := getAlfaRate(currency)
 		if err != nil {
+			fmt.Println("AlfaError ", err)
+			wg.Done()
 			return
 		}
 		rates = append(rates, *rate)
